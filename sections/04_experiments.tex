@@ -1,0 +1,19 @@
+\section{Development Status and Evaluation Plan}\label{sec:experiments}
+\subsection{Available Development Evidence}
+The reference development record reports 56 passing local and simulated tests: 37 for blockchain-related functionality, 11 for assistant integration, four for the avatar, and four for audio segmentation \cite{blockchain}. These counts are reported from the source record and have not been independently rerun for this paper. They do not demonstrate real-device sensing, a production cloud deployment, actual blockchain transactions, end-to-end voice interaction, or integrated coaching performance.
+
+\subsection{Planned Comparative Evaluation}
+Table~\ref{tab:comparison} summarizes proposed comparisons and metrics. For POI recommendations, assess suitability and requirement satisfaction alongside detour distance, using predefined scenarios and an independently specified assessment procedure. Compare fixed weather alerts with context-aware alerts using alert delay and false-positive and missed-alert rates against labeled scenarios. Compare direct vision-language estimates with the confirmed, database-assisted workflow using mean absolute error, mean absolute percentage error where reference values are nonzero, and recording time.
+
+Compare text, voice, and avatar conditions using task comprehension, completion time, perceived workload, and the System Usability Scale. Test missing data and unavailable services for appropriate fallback and unsupported outputs. For integrity, measure tamper detection and verification time using controlled modifications, and assess anchoring cost only after real transactions are enabled. These comparisons are proposed, not completed. Sample sizes, datasets, ground-truth collection, statistical analysis, and deployment settings must be specified before evaluation.
+\input{tables/comparison}
+
+For $n$ reference values $y_i$ and estimates $\hat y_i$, the proposed nutritional error measures are
+\begin{align}
+\mathrm{MAE} &= \frac{1}{n}\sum_{i=1}^{n}|\hat y_i-y_i|,\\
+\mathrm{MAPE} &= \frac{100}{n}\sum_{i=1}^{n}\left|\frac{\hat y_i-y_i}{y_i}\right|\%.
+\end{align}
+MAPE is calculated only for nonzero reference values; zero-reference cases are reported separately using absolute errors. The corresponding sample counts must be reported.
+
+\subsection{Limitations}
+The research materials do not establish clinical validity, exercise safety, long-term adherence, or the effectiveness of the proposed recommendations. Smartphone motion data without heart-rate measurements provide limited information about exertion. Real-world performance will depend on data quality, service availability, user consent, privacy protections, and validation in representative settings.

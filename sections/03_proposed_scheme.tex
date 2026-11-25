@@ -1,0 +1,138 @@
+\section{Proposed Scheme}\label{sec:method}
+\subsection{Problem Formulation}
+Let $s_t=(p_t,c_t,w_t,r_t,u_t,q_t)$ denote position, cadence, weather, self-reported state, user needs, and data quality at time $t$. Missing fields are marked unknown, not interpreted as zero or normal. Given candidates $P$, define the feasible set
+\begin{equation}
+F(s_t)=\{i\in P: h_j(i,s_t)=1\ \text{for all }j\},
+\label{eq:feasible}
+\end{equation}
+where $h_j$ checks a required condition such as need, route accessibility, or data validity. An unknown required condition does not pass. If $F(s_t)$ is empty, the system requests clarification or falls back without recommending a candidate.
+
+For feasible candidates, define normalized cost and selection as
+\begin{align}
+J_i &= \alpha d_i+\beta t_i+\gamma r_i+\delta b_i,\label{eq:cost}\\
+i^* &= \arg\min_{i\in F(s_t)} J_i,\quad
+\alpha+\beta+\gamma+\delta=1.\label{eq:selection}
+\end{align}
+The terms represent normalized detour distance, additional travel time, defined environmental cost, and preference mismatch, respectively. Costs lie in $[0,1]$ and weights are nonnegative; ties use a fixed identifier. Required risk data cannot be silently replaced with zero. This candidate model and its weights require evaluation.
+
+Estimated total energy expenditure (kcal), given metabolic equivalent $MET$, body mass $m$ in kg, and duration $\tau$ in minutes, is
+\begin{equation}
+E=\frac{MET\times 3.5\times m\times\tau}{200}.
+\label{eq:energy}
+\end{equation}
+For nutrient $k$, confirmed portions $g_i$ in grams and database values $v_{ik}$ per 100 g yield
+\begin{equation}
+N_k=\sum_{i=1}^{n}\frac{g_i}{100}v_{ik}.
+\label{eq:nutrition}
+\end{equation}
+Both estimates depend on their inputs and assumptions. For integrity, let $B$ be the UTF-8 bytes of the complete encrypted JSON package. Its digest is
+\begin{equation}
+h=\operatorname{SHA256}(B).
+\label{eq:digest}
+\end{equation}
+Verification compares $h$ with a trusted reference and checks the AES-GCM authentication tag during decryption. A matching digest alone does not establish the authenticity of the original sensor readings.
+
+\subsection{System Architecture}
+The intended inputs include smartphone GPS and motion data, activity duration, cadence when available, weather information, and explicit user requests. The agent interprets intent and plans tasks; domain tools retrieve or calculate supporting information through a proposed Model Context Protocol (MCP) interface. Outputs may include a recommended replenishment or rest location, a route adjustment, or a suggestion to stop an activity. Missing or stale inputs should be identified, and unavailable services should trigger an explicit fallback instead of unsupported numerical claims. The agent does not diagnose health conditions.
+
+POI selection is planned to consider user requirements, route accessibility, detour cost, and environmental conditions, rather than proximity alone. The candidate scoring model is given in \eqref{eq:cost}; operational thresholds, data sources, and update intervals remain to be specified. Energy expenditure may be estimated using metabolic equivalent (MET) information and activity duration, subject to available inputs and stated assumptions; the estimate is not a direct physiological measurement.
+
+A vision-language model proposes food items from an image; the user confirms or corrects the items and portions. A nutrition database then supplies values for calculation, with assumptions and uncertainty presented to the user. The intended interface supports text, voice, and a three-dimensional avatar. These modalities and their relative benefits require further integration and user evaluation.
+
+A separate prototype collects phone accelerometer samples, persists them locally in IndexedDB, and packages them using AES-256-GCM encryption. A SHA-256 digest of the encrypted package can support later integrity comparison; wallet-based authentication and consent-controlled public summaries are also described in the development record \cite{blockchain}. Encrypted data and recovery keys require careful protection, and local plaintext samples remain sensitive. The IOTA EVM interface models anchoring states, but actual chain writes are disabled and tests use a substitute transport. Thus neither a production deployment nor real on-chain verification has been established. Integration of this prototype with the proposed coaching workflow remains future work.
+
+Fig.~\ref{fig:execution-flow} illustrates the proposed closed loop, which proceeds as follows. First, collect available sensor, weather, and user inputs and validate their provenance, timestamps, permissions, and required fields. Second, identify the user's intent and ask for clarification if it is ambiguous. If the user reports urgent warning symptoms, advise stopping the activity and seeking appropriate emergency assistance. Third, select approved domain tools, retrieve task-specific data, and validate their outputs. Missing essential information triggers an explicit fallback. Fourth, filter and rank feasible POIs or, for a nutrition task, confirm food and portion sizes before database calculation. Finally, present the validated result through the selected interface, record only permitted metadata, and update the context. Voice and avatar presentations should preserve the same key values and constraints. This is a planned workflow, not an end-to-end implementation claim.
+
+\begin{figure*}[t]
+\centering
+\resizebox{0.96\textwidth}{!}{%
+\begin{tikzpicture}[
+  block/.style={draw, rounded corners=2pt, fill=blue!5, align=center, minimum height=12mm, text width=29mm, font=\small},
+  support/.style={block, fill=orange!12},
+  flow/.style={-{Stealth[length=2mm]}, thick},
+  govern/.style={-{Stealth[length=2mm]}, dashed}
+]
+\node[block] (context) at (0,0) {1. User context\\and task};
+\node[block] (input) at (4,0) {2. Multisource\\inputs};
+\node[block] (planner) at (8,0) {3. LLM\\planner};
+\node[block] (tools) at (12,0) {4. MCP data\\tools};
+\node[block] (engine) at (12,-2.4) {5. Domain\\analysis};
+\node[support] (knowledge) at (8,-2.4) {6. Domain knowledge\\and constraints};
+\node[block] (decision) at (4,-2.4) {7. Decision and\\validation};
+\node[block] (output) at (0,-2.4) {8. Text, voice\\or avatar};
+\node[support, text width=52mm] (governance) at (6,-5.2) {Cross-cutting data governance:\\consent, freshness and integrity};
+\draw[flow] (context) -- (input);
+\draw[flow] (input) -- (planner);
+\draw[flow] (planner) -- (tools);
+\draw[flow] (tools) -- (engine);
+\draw[flow] (engine.south) -- ++(0,-0.55) -| (decision.south);
+\draw[flow] (knowledge) -- (decision);
+\draw[flow] (knowledge.north) -- ++(0,0.5) -| (engine.west);
+\draw[flow] (decision) -- (output);
+\draw[flow] (output.west) -- ++(-0.8,0) |- (context.west);
+\end{tikzpicture}%
+}
+\caption{Proposed closed-loop coaching architecture adapted from the A2Z research framework. Domain knowledge constrains analysis and decisions; governance applies across stages.}
+\label{fig:execution-flow}
+\end{figure*}
+
+Fig.~\ref{fig:data-flow} distinguishes the encrypted recording path from the separately consented public-summary path. The anchoring interface is shown as a planned operation; actual chain writes are disabled.
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=7mm and 7mm,
+  block/.style={draw, rounded corners=2pt, fill=blue!5, align=center, minimum height=12mm, text width=28mm, font=\footnotesize},
+  optional/.style={block, fill=orange!12},
+  flow/.style={-{Stealth[length=2mm]}, thick}
+]
+\node[block] (auth) {Wallet sign-in\\and sensor consent};
+\node[block, right=of auth] (sensor) {Phone accelerometer\\and IndexedDB};
+\node[block, right=of sensor] (crypto) {AES-256-GCM\\encryption};
+\node[block, right=of crypto] (hash) {SHA-256\\digest};
+\node[block, right=of hash] (api) {Worker-compatible\\API};
+\node[block, below=15mm of api] (storage) {D1-compatible\\off-chain storage};
+\node[optional, below=of hash] (anchor) {Separate consent and\\IOTA EVM interface};
+\node[optional, below=of auth] (public) {Separately consented\\public batches};
+\node[block, below=of sensor] (summary) {Public summary\\API};
+\node[block, below=of crypto] (validate) {Format and\\freshness checks};
+\node[block, below=of summary] (assistant) {AI assistant};
+\draw[flow] (auth) -- (sensor);
+\draw[flow] (sensor) -- (crypto);
+\draw[flow] (crypto) -- (hash);
+\draw[flow] (hash) -- (api);
+\draw[flow] (api) -- (storage);
+\draw[flow] (api) -- (anchor);
+\draw[flow] (public) -- (summary);
+\draw[flow] (summary) -- (validate);
+\draw[flow] (validate) |- (assistant);
+\end{tikzpicture}
+\caption{Sensor-data management prototype adapted from the A2Z research framework. Public batches are separate from encrypted recordings; actual chain writes are disabled.}
+\label{fig:data-flow}
+\end{figure*}
+
+\subsection{Proposed Algorithm}
+\begin{algorithm}[t]
+\caption{Context-Constrained Fitness Coaching (Proposed)}
+\label{alg:coaching}
+\begin{algorithmic}[1]
+\Require Context $s$, request $u$, approved tools, consent
+\Ensure Validated recommendation or explicit fallback
+\State Validate required fields, timestamps, and permissions
+\If{intent is ambiguous} \State \Return request for clarification \EndIf
+\If{urgent warning symptoms reported} \State \Return stop and emergency-assistance guidance \EndIf
+\State Select approved tools; execute with bounded retries
+\If{essential data or tool outputs are unavailable} \State \Return explicit fallback \EndIf
+\If{task is POI recommendation}
+  \State Generate candidates and filter hard constraints
+  \If{no verified candidate remains} \State \Return no verified candidate \EndIf
+  \State Rank feasible candidates using \eqref{eq:cost}
+\ElsIf{task is nutrition assessment}
+  \State Identify foods and obtain user confirmation of portions
+  \State Retrieve nutrient values and calculate \eqref{eq:nutrition}
+\EndIf
+\State Present validated result with assumptions and sources
+\State Record permitted metadata and update context
+\end{algorithmic}
+\end{algorithm}
+
