@@ -1,19 +1,11 @@
 \section{Development Status and Evaluation Plan}\label{sec:experiments}
-\subsection{Available Development Evidence}
-The reference development record reports 56 passing local and simulated tests: 37 for blockchain-related functionality, 11 for assistant integration, four for the avatar, and four for audio segmentation \cite{blockchain}. These counts are reported from the source record and have not been independently rerun for this paper. They do not demonstrate real-device sensing, a production cloud deployment, actual blockchain transactions, end-to-end voice interaction, or integrated coaching performance.
+\subsection{Available Evidence}
+The source development record reports 56 passing local and simulated tests: 37 for blockchain-related functions, 11 for assistant integration, four for the avatar and four for audio segmentation \cite{blockchain}. These results were not independently rerun for this paper and do not validate GPS trajectories, food MCP, real-device sensing, production cloud deployment, actual blockchain transactions or the integrated workflow.
 
-\subsection{Planned Comparative Evaluation}
-Table~\ref{tab:comparison} summarizes proposed comparisons and metrics. For POI recommendations, assess suitability and requirement satisfaction alongside detour distance, using predefined scenarios and an independently specified assessment procedure. Compare fixed weather alerts with context-aware alerts using alert delay and false-positive and missed-alert rates against labeled scenarios. Compare direct vision-language estimates with the confirmed, database-assisted workflow using mean absolute error, mean absolute percentage error where reference values are nonzero, and recording time.
+\subsection{Planned Evaluation}
+Table~\ref{tab:comparison} summarizes the proposed evaluation. Compare raw and quality-filtered positioning against measured reference routes and timed walking; report trajectory deviation, distance error, speed error, missing intervals and, where available, cadence error. Compare fixed and lower-load sampling on the same device and route, measuring data volume, battery change, elapsed time and missing-data rate. Report phone model, operating system, permissions, background restrictions and carrying position.
 
-Compare text, voice, and avatar conditions using task comprehension, completion time, perceived workload, and the System Usability Scale. Test missing data and unavailable services for appropriate fallback and unsupported outputs. For integrity, measure tamper detection and verification time using controlled modifications, and assess anchoring cost only after real transactions are enabled. These comparisons are proposed, not completed. Sample sizes, datasets, ground-truth collection, statistical analysis, and deployment settings must be specified before evaluation.
+For GIS, compare straight-line and available route-network distances using verified POIs, and assess route suitability and user completion. For the avatar and food MCP, measure task completion, query success, confirmation and recording time using predefined tasks. Test authorized cloud uploads, digest verification and separate-consent handling; evaluate actual anchoring only after real transactions are enabled. Ground truth, sample size and statistical analysis must be specified before experiments.
 \input{tables/comparison}
 
-For $n$ reference values $y_i$ and estimates $\hat y_i$, the proposed nutritional error measures are
-\begin{align}
-\mathrm{MAE} &= \frac{1}{n}\sum_{i=1}^{n}|\hat y_i-y_i|,\\
-\mathrm{MAPE} &= \frac{100}{n}\sum_{i=1}^{n}\left|\frac{\hat y_i-y_i}{y_i}\right|\%.
-\end{align}
-MAPE is calculated only for nonzero reference values; zero-reference cases are reported separately using absolute errors. The corresponding sample counts must be reported.
-
-\subsection{Limitations}
-The research materials do not establish clinical validity, exercise safety, long-term adherence, or the effectiveness of the proposed recommendations. Smartphone motion data without heart-rate measurements provide limited information about exertion. Real-world performance will depend on data quality, service availability, user consent, privacy protections, and validation in representative settings.
+For references $y_i$ and estimates $\hat y_i$, report $\mathrm{MAE}=n^{-1}\sum_i |\hat y_i-y_i|$. Percentage error may also be reported for nonzero references, with the sample count and zero-reference cases reported separately. Cardiac workload and heart rate are outside first-phase measurements. A later phase must establish an appropriate smartphone measurement method and validate it against a suitable reference before reporting heart-rate-based indices.

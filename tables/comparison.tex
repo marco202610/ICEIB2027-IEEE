@@ -2,16 +2,15 @@
 \caption{Planned evaluation; results are not yet available}
 \label{tab:comparison}
 \centering
-\begin{tabular}{p{0.20\columnwidth}p{0.30\columnwidth}p{0.37\columnwidth}}
+\begin{tabular}{p{0.24\columnwidth}p{0.65\columnwidth}}
 \toprule
-Task & Comparisons & Example measures \\
+Task & Example measures \\
 \midrule
-POI selection & Nearest, rules, agent & Suitability, detour \\
-Weather alerts & Fixed, contextual & Delay, missed and false alerts \\
-Nutrition & Direct VLM, confirmed database & MAE, MAPE, time \\
-Interaction & Text, voice, avatar & Usability, comprehension \\
-Robustness & Normal, missing data, outages & Fallback, unsupported outputs \\
-Integrity & Unmodified, modified data & Detection, verification time \\
+Trajectory and speed & Distance error, speed MAE, missing intervals \\
+POI and route & Distance error, suitability, task completion \\
+Lightweight sensing & Battery change, data volume, missing-data rate \\
+Food MCP & Query success, confirmation and recording time \\
+Data management & Upload success, digest verification, anchoring status \\
 \bottomrule
 \end{tabular}
 \end{table}
